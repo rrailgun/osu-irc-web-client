@@ -7,6 +7,7 @@ import { IrcWebsocketService } from '../../service/irc-websocket.service';
 import { filter } from 'rxjs';
 import { IRCMessage } from '../../models/message';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 export interface LobbyPlayerInfo {
   mods: string[];
@@ -18,7 +19,7 @@ export interface LobbyPlayerInfo {
 @Component({
   selector: 'app-mp-lobby-info',
   standalone: true,
-  imports: [CommonModule, NzCardModule, NzTableModule, NzTagModule, NzGridModule],
+  imports: [CommonModule, NzCardModule, NzTableModule, NzTagModule, NzGridModule, NzIconModule],
   templateUrl: './mp-lobby-info.component.html',
   styleUrl: './mp-lobby-info.component.scss'
 })
@@ -110,6 +111,10 @@ export class MpLobbyInfoComponent implements OnInit {
           }
         }
       })
+  }
+
+  refreshLobby() {
+    this.chatService.sendMessage('#mp_'+this.matchID, '!mp settings');
   }
 
   getRoomName(message: string): string {

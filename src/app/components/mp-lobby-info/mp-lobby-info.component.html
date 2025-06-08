@@ -1,9 +1,9 @@
 <ng-template #noData>-</ng-template>
 <ng-template #cardTitle>
-  <span>{{ lobbyName || 'Lobby Info' }}</span>
-  <button nz-button nzType="default" (click)="refreshLobby()" style="margin-left: 8px;">
-    Refresh
-  </button>
+    <span>{{ lobbyName || 'Lobby Info' }}</span>
+    <button nz-button nzType="default" (click)="refreshLobby()" style="margin-left: 8px;">
+        Refresh
+    </button>
 </ng-template>
 <nz-card [nzTitle]="cardTitle">
     <nz-row [nzGutter]="16">
@@ -46,7 +46,8 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let player of players; let i = index">
+            @for(player of players; track player?.name; let i = $index) {
+            <tr *ngIf="player">
                 <td>{{ i + 1 }}</td>
                 <td>{{player?.teamColor ?? '-'}}</td>
                 <td>
@@ -63,8 +64,7 @@
                     {{player?.ready ?? '-'}}
                 </td>
             </tr>
+            }
         </tbody>
     </nz-table>
-
-
 </nz-card>
