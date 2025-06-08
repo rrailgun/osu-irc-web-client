@@ -1,18 +1,14 @@
 <ng-template #noData>-</ng-template>
-<nz-card [nzTitle]="lobbyName || 'Lobby Info'">
-    <!-- <p><strong>MP Link: </strong><a [href]="'https://osu.ppy.sh/mp/'+matchID" target="_blank">{{
-            'https://osu.ppy.sh/mp/'+matchID }}</a></p>
-    <p><strong>Current Beatmap: </strong>
-    <ng-container *ngIf="beatmap.link; else noData">
-        <a [href]="beatmap.link" target="_blank">{{beatmap.name}}</a>
-    </ng-container>
-    </p>
-    <div>
-        <strong>Enabled Mods: </strong><nz-tag *ngFor="let mod of globalMods">{{ mod }}</nz-tag>
-    </div> -->
+<ng-template #cardTitle>
+  <span>{{ lobbyName || 'Lobby Info' }}</span>
+  <button nz-button nzType="default" (click)="refreshLobby()" style="margin-left: 8px;">
+    Refresh
+  </button>
+</ng-template>
+<nz-card [nzTitle]="cardTitle">
     <nz-row [nzGutter]="16">
         <nz-col [nzSpan]="12">
-            <p><strong>MP Link:</strong>
+            <p><strong>MP Link: </strong>
                 <a [href]="'https://osu.ppy.sh/mp/' + matchID" target="_blank">
                     {{ 'https://osu.ppy.sh/mp/' + matchID }}
                 </a>
@@ -20,7 +16,7 @@
         </nz-col>
 
         <nz-col [nzSpan]="12">
-            <p><strong>Current Beatmap:</strong>
+            <p><strong>Current Beatmap: </strong>
                 <ng-container *ngIf="beatmap.link; else noData">
                     <a [href]="beatmap.link" target="_blank">{{ beatmap.name }}</a>
                 </ng-container>
@@ -28,14 +24,14 @@
         </nz-col>
 
         <nz-col [nzSpan]="12">
-            <p><strong>Enabled Mods:</strong>
+            <p><strong>Enabled Mods: </strong>
                 <nz-tag *ngFor="let mod of globalMods">{{ mod }}</nz-tag>
             </p>
         </nz-col>
 
         <nz-col [nzSpan]="12">
-            <p><strong>Team Mode:</strong> {{ matchSettings.mode }}</p>
-            <p><strong>Win Condition:</strong> {{ matchSettings.winCon }}</p>
+            <p><strong>Team Mode: </strong> {{ matchSettings.mode }}</p>
+            <p><strong>Win Condition: </strong> {{ matchSettings.winCon }}</p>
         </nz-col>
     </nz-row>
 
