@@ -101,6 +101,7 @@ export class MpLobbyInfoComponent implements OnInit {
           }
           case message === 'Disabled all mods, disabled FreeMod': {
             this.globalMods = [];
+            this.removeModsFromPlayers();
             break;
           }
           case message === 'All players are ready': {
@@ -240,6 +241,15 @@ export class MpLobbyInfoComponent implements OnInit {
     this.players = this.players.map(player => {
       if (player) {
         player.teamColor = undefined;
+      }
+      return player;
+    });
+  }
+
+  private removeModsFromPlayers() {
+    this.players = this.players.map(player => {
+      if (player) {
+        player.mods = [];
       }
       return player;
     });
