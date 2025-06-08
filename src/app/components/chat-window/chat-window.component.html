@@ -1,0 +1,22 @@
+<nz-card [nzTitle]="'Chat | '+channel" style="width: 100%;">
+  <nz-list [nzBordered]="false" style="max-height: 300px; overflow-y: auto;">
+    <nz-list-item *ngFor="let message of messages">
+      <ng-template #profileName>
+          <a [href]="'https://osu.ppy.sh/users/'+message.nick" target="_blank" >
+            {{message.nick}}
+          </a>
+        </ng-template>
+      <nz-list-item-meta [nzTitle]="profileName" [nzDescription]="message.message">
+      </nz-list-item-meta>
+      <div>{{ message.time | date: 'shortTime' }}</div>
+    </nz-list-item>
+  </nz-list>
+
+  <div class="chat-input-container">
+    <input nz-input [(ngModel)]="newMessage" placeholder="Type a message" (keyup.enter)="sendMessage()"
+      [disabled]="disableInput" />
+    <button nz-button nzType="primary" (click)="sendMessage()" [disabled]="disableInput">
+      Send
+    </button>
+  </div>
+</nz-card>

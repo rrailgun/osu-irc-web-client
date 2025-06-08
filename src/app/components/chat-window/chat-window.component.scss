@@ -1,0 +1,40 @@
+:host {
+  display: block;
+  max-width: 40%;
+  margin-left: .5rem;
+  margin-right: .5rem;
+}
+
+nz-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+nz-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 60vh;
+  padding-right: 8px;
+}
+
+nz-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+nz-list-item-meta {
+  max-width: 85%;
+  overflow-wrap: break-word;
+}
+
+input[nz-input] {
+  flex: 1;
+}
+
+.chat-input-container {
+  display: flex;
+  margin-top: 1em;
+  gap: 0.5em;
+}

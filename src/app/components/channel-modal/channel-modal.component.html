@@ -1,0 +1,5 @@
+<nz-modal [(nzVisible)]="isVisible" nzTitle="Join Channel" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()">
+    <ng-container *nzModalContent>
+        <input nz-input [(ngModel)]="channelName" placeholder="Enter channel name (e.g. #osu)" (keydown.enter)="handleOk()" />
+    </ng-container>
+</nz-modal>

@@ -1,0 +1,9 @@
+<nz-tabset (nzClose)="closeChannel($event)" nzType="editable-card" [(nzSelectedIndex)]="selectedIndex" (nzAdd)="openModal()">
+    @for (channel of ircChannels.keys(); track channel) {
+    <nz-tab nzClosable [nzTitle]="channel" >
+        <app-chat-window [channel]="channel"></app-chat-window>
+    </nz-tab>
+    }
+</nz-tabset>
+
+<app-channel-modal #modal (submitted)="joinChannelRequest($event)" />
