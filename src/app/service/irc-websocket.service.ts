@@ -3,7 +3,7 @@ import { BehaviorSubject, filter, map, Observable } from 'rxjs';
 import { IRCWebSocketEventTypes } from '../models/irc-event-types';
 import { IRCMessage, IRCMessageType } from '../models/message';
 import { extractMPId } from '../util/bancho-bot-util';
-import { playNotification } from '../util/audio-playing';
+import { playNotification, playThankYouForPlaying } from '../util/audio-playing';
 
 
 @Injectable({
@@ -57,9 +57,7 @@ export class IrcWebsocketService implements OnDestroy {
     this.socket.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
-        console.log(data)
         data.time = new Date()
-        // On Connection (Initialize)
         switch (data.type) {
           case 'connected': {
             this.connectionStatus.next(true);
@@ -69,7 +67,8 @@ export class IrcWebsocketService implements OnDestroy {
             if (this.loggedInUsername == data.target) this.msgFromUnjoinedChannel.emit(data.nick); // Emit PM to ensure channel tab is opened
             if (data.nick == 'BanchoBot') this.handleBanchoBotMsg(data.message);
             this.messageLog.next([...this.messageLog.getValue(), data])
-            if (data.message.includes(` ${this.loggedInUsername} `)) playNotification();
+            if (new RegExp(`\\b${this.loggedInUsername}\\b`).test(data.message)) playNotification();
+            if (data.message === 'The match has finished!') playThankYouForPlaying();
             break;
           }
           case 'close': {
@@ -100,6 +99,7 @@ export class IrcWebsocketService implements OnDestroy {
       channel
     });
     this.joinedChannels.next(this.joinedChannels.getValue().concat([channel]))
+    if (channel.startsWith('#mp_')) this.sendMessage(channel, '!mp settings')
   }
 
   quit(reason: string = 'Goodbye'): void {
@@ -152,7 +152,6 @@ export class IrcWebsocketService implements OnDestroy {
       let mpId = extractMPId(msg);
       let mp_lobby_channel = `#mp_${mpId}`;
       this.msgFromUnjoinedChannel.emit(mp_lobby_channel);
-      this.sendMessage(mp_lobby_channel, '!mp settings')
     }
   }
 

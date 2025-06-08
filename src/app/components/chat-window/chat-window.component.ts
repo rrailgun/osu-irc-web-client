@@ -10,6 +10,7 @@ import { User } from '../../models/user';
 import { IrcWebsocketService } from '../../service/irc-websocket.service';
 import { IRCMessage } from '../../models/message';
 import { filter } from 'rxjs';
+import { MpLobbyInfoComponent } from '../mp-lobby-info/mp-lobby-info.component';
 
 @Component({
   selector: 'app-chat-window',
@@ -21,7 +22,8 @@ import { filter } from 'rxjs';
     NzListModule,
     NzInputModule,
     NzButtonModule,
-    NzAvatarModule
+    NzAvatarModule,
+    MpLobbyInfoComponent
   ],
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.scss']
