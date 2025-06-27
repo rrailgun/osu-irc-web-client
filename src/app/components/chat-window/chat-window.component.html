@@ -1,6 +1,6 @@
 <div class="side-by-side-container">
-  <nz-card [nzTitle]="'Chat | '+channel" style="width: 100%;">
-    <nz-list [nzBordered]="false" style="max-height: 70vh; overflow-y: auto;">
+  <nz-card [nzTitle]="'Chat | '+channel" style="width: 30%;">
+    <nz-list [nzBordered]="false" style="max-height: 70vh; overflow-y: auto;" #scrollContainer>
       <nz-list-item *ngFor="let message of messages">
         <ng-template #profileName>
           <a [href]="'https://osu.ppy.sh/users/'+message.nick" target="_blank">
@@ -22,6 +22,11 @@
     </div>
   </nz-card>
   <ng-container *ngIf="channel?.startsWith('#mp_')">
-    <app-mp-lobby-info [matchID]="channel!.split('#mp_')[1]"></app-mp-lobby-info>
+    @let matchID = channel!.substring(4);
+    <div style="display: flex; flex-direction: row; width: 70%;">
+      <app-mp-lobby-info [matchID]="matchID" style="width: 100%;"></app-mp-lobby-info>
+      <app-match-info [matchID]="matchID" style="width: 100%;"></app-match-info>
+
+    </div>
   </ng-container>
 </div>

@@ -86,7 +86,6 @@ export class IrcWebsocketService implements OnDestroy {
 
   private send(message: any): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
-      console.log('sending msg', message)
       this.socket.send(JSON.stringify(message));
     } else {
       console.warn('[WebSocket] Not connected, cannot send message');

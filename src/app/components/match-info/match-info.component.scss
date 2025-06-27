@@ -1,0 +1,45 @@
+.beatmap-card {
+    position: relative;
+    height: 160px;
+    background-size: cover;
+    background-position: center;
+
+    .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        color: #fff;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+
+        h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+
+            a {
+                color: #fff;
+                text-decoration: none;
+            }
+        }
+
+        p {
+            margin: 0;
+        }
+    }
+}
+
+h4 {
+    margin: 16px 0 8px;
+    font-weight: 600;
+}
+
+nz-card {
+    margin-left: .75rem;
+    margin-right: .75rem;
+}
+
+nz-card:not(:first-child) {
+    margin-top: .75rem;
+}

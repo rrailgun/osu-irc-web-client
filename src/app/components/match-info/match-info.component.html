@@ -1,0 +1,57 @@
+<ng-container *ngIf="matchData$ | async as matchData">
+  <ng-container *ngIf="hasEventsWithGame(matchData); else noEvents">
+    <ng-container *ngFor="let event of matchData.events">
+        <!-- TODO: Add more than just games (maps) API has player join/leave -->
+      <ng-container *ngIf="event.game">
+        <nz-card style="overflow: hidden; padding: 0;" [nzBodyStyle]="{ padding: '0' }">
+          <div class="beatmap-card" [style.backgroundImage]="'url(' + event.game.beatmap.beatmapset.covers.card + ')'">
+            <div class="overlay">
+              <h3>
+                <a [href]="'https://osu.ppy.sh/b/' + event.game.beatmap.id" target="_blank" rel="noopener noreferrer">
+                  {{event.game.beatmap.beatmapset.artist}} - {{ event.game.beatmap.beatmapset.title }}[{{ event.game.beatmap.version }}]
+                </a>
+              </h3>
+              <p><strong>Mode:</strong> {{ event.game.mode }}</p>
+              <p><strong>Team Mode:</strong> {{ formatTeamType(event.game.team_type) }}</p>
+              <p *ngIf="event.game.mods.length > 0"><strong>Mods:</strong> {{ event.game.mods.join(', ') }}</p>
+            </div>
+          </div>
+
+          <div style="padding: 16px;">
+            <ng-container *ngFor="let team of getTeams(event.game)">
+              <h4 *ngIf="team.scores.length && team.key != 'all'" [style.color]="team.color">
+                {{ team.label }} (Total Score: {{ team.totalScore | number }})
+              </h4>
+
+              <nz-list [nzDataSource]="team.scores" [nzRenderItem]="player" nzItemLayout="horizontal">
+                <ng-template #player let-score>
+                  <nz-list-item>
+                    <nz-list-item-meta
+                      [nzAvatar]="getUser(score.user_id, matchData.users)?.avatar_url || ''"
+                      [nzTitle]="getUser(score.user_id, matchData.users)?.username || 'Unknown User'"
+                      [nzDescription]="scoreTemplate">
+                      <ng-template #scoreTemplate>
+                        <div style="color: rgb(255, 255, 255);">
+                          <div style="font-size: 1.2em; font-weight: 600;">
+                            Score: {{ score.score | number }}
+                          </div>
+                          <div style="font-size: 0.85em; margin-top: 4px;">
+                            Acc: {{ (score.accuracy * 100) | number:'1.2-2' }}% | Rank: {{ score.rank }}
+                          </div>
+                        </div>
+                      </ng-template>
+                    </nz-list-item-meta>
+                  </nz-list-item>
+                </ng-template>
+              </nz-list>
+            </ng-container>
+          </div>
+        </nz-card>
+      </ng-container>
+    </ng-container>
+  </ng-container>
+
+  <ng-template #noEvents>
+    <nz-empty nzNotFoundContent="MP lobby has no events"></nz-empty>
+  </ng-template>
+</ng-container>

@@ -29,97 +29,126 @@ export class MpLobbyInfoComponent implements OnInit {
   players: (LobbyPlayerInfo | null)[] = new Array(16).fill(null);
   slots = Array.from({ length: 16 }, (_, i) => i + 1); // Use to iterate over 16 slots
   beatmap: { name: string, link: string } = { name: 'None', link: '' };
-  matchSettings: {mode: string, winCon: string} = {mode: '', winCon: ''}
+  matchSettings: { mode: string, winCon: string } = { mode: '', winCon: '' }
   globalMods: string[] = [];
 
   private chatService: IrcWebsocketService = inject(IrcWebsocketService);
+  messageHandlers = [
+    {
+      pattern: /Room name:\s*(.+?),\s*History:\s*https:\/\/osu\.ppy\.sh\/mp\/\d+/,
+      handler: (message: string) => {
+        this.lobbyName = message.match(/Room name:\s*(.+?),\s*History:\s*https:\/\/osu\.ppy\.sh\/mp\/\d+/)![1];
+      },
+    },
+    {
+      pattern: /Room name updated to "([^"]+)"/,
+      handler: (message: string) => {
+        this.lobbyName = message.match(/Room name updated to "([^"]+)"/)![1];
+      }
+    },
+    {
+      pattern: /(https:\/\/osu\.ppy\.sh\/b\/\d+)\s+(.*)$/,
+      handler: (message: string) => {
+        this.beatmap = this.handleBeatmapSetting(message)!;
+      },
+    },
+    {
+      pattern: /^Slot\s+(\d{1,2})\s+(Not Ready|Ready|No Map)\s+https:\/\/osu\.ppy\.sh\/u\/\d+\s+(.+?)\s*(?:\[\s*Team\s+(Red|Blue)(?:\s*\/\s*([^\]]+))?\s*|\[\s*([^\]]+)\s*)?\]?\s*$/i,
+      handler: (message: string) => {
+        this.handlePlayerUpdate(message);
+      },
+    },
+    {
+      pattern: /^(.+)\s+joined in slot\s+(\d+)(?:\s+for team\s+(red|blue))?\./i,
+      handler: (message: string) => {
+        this.handlePlayerJoined(message);
+      },
+    },
+    {
+      pattern: /^(.+)\s+moved to slot\s+(\d+)$/i,
+      handler: (message: string) => {
+        this.handlePlayerMoved(message);
+      },
+    },
+    {
+      pattern: /^(.+)\sleft the game\.$/,
+      handler: (message: string) => {
+        this.handlePlayerLeft(message);
+      },
+    },
+    {
+      pattern: /^(.+)\s+changed to\s+(Red|Blue)$/,
+      handler: (message: string) => {
+        this.handlePlayerChangeColor(message);
+      },
+    },
+    {
+      pattern: /^Active mods:\s*(.*)$/,
+      handler: (message: string) => {
+        this.globalMods = this.getActiveMods(message);
+      },
+    },
+    {
+      pattern: /^Enabled\s+(.+?)(?:,\s*disabled.*)?$/i,
+      handler: (message: string) => {
+        this.globalMods = this.handleModChange(message);
+      },
+    },
+    {
+      pattern: /Team mode:\s*(\w+),\s*Win condition:\s*(\w+)/,
+      handler: (message: string) => {
+        this.matchSettings = this.getTeamModeAndWinCon(message)!;
+      },
+    },
+    {
+      pattern: /Changed match settings to \d+ slots,\s*(\w+),\s*(\w+)/,
+      handler: (message: string) => {
+        this.matchSettings = this.handleTeamModeAndWinConChange(message)!;
+      },
+    },
+    {
+      pattern: /, disabled FreeMod/,
+      handler: () => {
+        this.globalMods = [];
+        this.removeModsFromPlayers();
+      },
+    },
+    // Hacky solution needs to be replaced
+    {
+      pattern: /^All players are ready$/,
+      handler: () => {
+        this.players.forEach(player => {
+          if (player !== null) player.ready = 'Ready';
+        });
+      },
+    },
+  ];
+
 
   ngOnInit(): void {
     this.chatService.latestMessage$
       .pipe(filter((newMsg: IRCMessage) => (newMsg.target === '#mp_' + this.matchID)))
       .subscribe(newMsg => {
         let message = newMsg.message;
-        console.log(JSON.stringify(message));
-        switch (true) {
-          // !mp settings is ran
-          case /Room name:\s*(.*?),\s*History:/.test(message): {
-            this.lobbyName = this.getRoomName(message);
-            break;
-          }
-          // beatmap link pasted by banchobot
-          case /(https:\/\/osu\.ppy\.sh\/b\/\d+)\s+(.*)$/.test(message): {
-            this.beatmap = this.handleBeatmapSetting(message)!;
-            break;
-          }
-          // This happens when !mp settings is ran
-          case /^Slot\s+(\d{1,2})\s+(Not Ready|Ready|No Map)\s+https:\/\/osu\.ppy\.sh\/u\/\d+\s+(\S+)(?:\s+\[\s*Team\s+(Red|Blue)(?:\s*\/\s*([^\]]+))?\s*\])?\s*$/.test(message): {
-            this.handlePlayerUpdate(message);
-            break;
-          }
-          // This happens when someone joins
-          case /^(\S+)\s+joined in slot\s+(\d+)(?:\s+for team\s+(red|blue))?\./i.test(message): {
-            this.handlePlayerJoined(message);
-            break;
-          }
-          // This happens when a player moves to a new slot
-          case /^(\S+)\s+moved to slot\s+(\d+)$/.test(message): {
-            this.handlePlayerMoved(message);
-            break;
-          }
-          // Player leaves
-          case /^(\S+)\sleft the game\.$/.test(message): {
-            this.handlePlayerLeft(message);
-            break;
-          }
-          // Player changes color
-          case /^(\S+)\s+changed to\s+(Red|Blue)$/.test(message): {
-            this.handlePlayerChangeColor(message);
-            break;
-          }
-          // Active Mods: ... or Enabled ...
-          case /^Active mods:\s*(.*)$/.test(message): {
-            this.globalMods = this.getActiveMods(message);
-            break;
-          }
-          // Mod Change
-          case /^Enabled\s+(.+?)(?:,\s*disabled.*)?$/i.test(message): {
-            this.globalMods = this.handleModChange(message);
-            break;
-          }
-          // mp settings, Team mode + win con
-          case /Team mode:\s*(\w+),\s*Win condition:\s*(\w+)/.test(message): {
-            this.matchSettings = this.getTeamModeAndWinCon(message)!;
-            break;
-          }
-          case /Changed match settings to \d+ slots,\s*(\w+),\s*(\w+)/.test(message): {
-            this.matchSettings = this.handleTeamModeAndWinConChange(message)!;
-            break;
-          }
-          case message === 'Disabled all mods, enabled FreeMod': {
-            this.globalMods = ['FreeMod'];
-            break;
-          }
-          case message === 'Disabled all mods, disabled FreeMod': {
-            this.globalMods = [];
-            this.removeModsFromPlayers();
-            break;
-          }
-          case message === 'All players are ready': {
-            this.players.forEach(player => {
-              if (player !== null) player.ready = 'Ready';
-            })
-            break;
-          }
-        }
+        this.processMessage(message);
       })
   }
 
+  processMessage(message: string) {
+    for (const { pattern, handler } of this.messageHandlers) {
+      if (pattern.test(message)) {
+        handler.call(this, message);
+        break;
+      }
+    }
+  }
+
   refreshLobby() {
-    this.chatService.sendMessage('#mp_'+this.matchID, '!mp settings');
+    this.chatService.sendMessage('#mp_' + this.matchID, '!mp settings');
   }
 
   getRoomName(message: string): string {
-    let match = message.match(/Room name:\s*(.*?),\s*History:/);
+    let match = message.match(/Room name:\s*(.+?),\s*History:\s*https:\/\/osu\.ppy\.sh\/mp\/\d+/);
     return match ? match[1] : "";
   }
 
@@ -128,7 +157,7 @@ export class MpLobbyInfoComponent implements OnInit {
   }
 
   handlePlayerJoined(message: string) {
-    let match = message.match(/^(\S+)\s+joined in slot\s+(\d+)(?:\s+for team\s+(red|blue))?\./i);
+    let match = message.match(/^(.+)\s+joined in slot\s+(\d+)(?:\s+for team\s+(red|blue))?\./i);
     if (!match) return;
     let name = match[1];
     let slot = Number(match[2]);
@@ -139,7 +168,7 @@ export class MpLobbyInfoComponent implements OnInit {
   }
 
   handlePlayerMoved(message: string) {
-    let match = message.match(/^(\S+)\s+moved to slot\s+(\d+)$/);
+    let match = message.match(/^(.+)\s+moved to slot\s+(\d+)$/i);
     if (!match) return;
     let name = match[1];
     let newSlot = Number(match[2]);
@@ -169,15 +198,14 @@ export class MpLobbyInfoComponent implements OnInit {
   }
 
   handlePlayerUpdate(message: string) {
-    let match = message.match(/^Slot\s+(\d{1,2})\s+(Not Ready|Ready|No Map)\s+https:\/\/osu\.ppy\.sh\/u\/\d+\s+(\S+)(?:\s+\[\s*Team\s+(Red|Blue)(?:\s*\/\s*([^\]]+))?\s*\])?\s*$/);
+    let match = message.match(/^Slot\s+(\d{1,2})\s+(Not Ready|Ready|No Map)\s+https:\/\/osu\.ppy\.sh\/u\/\d+\s+(.+?)\s*(?:\[\s*Team\s+(Red|Blue)(?:\s*\/\s*([^\]]+))?\s*|\[\s*([^\]]+)\s*)?\]?\s*$/i);
     if (match) {
       let slot = Number(match[1]);
-      let ready = match[2]; // e.g. "Not Ready"
+      let ready = match[2];
       let name = match[3];
       let teamColor = match[4];
-      let mods = match[5]
-        ? match[5].split(',').map(m => m.trim())
-        : [];
+      let modString = match[5] || match[6] || '';
+      let mods = modString.split(',').map(m => m.trim())
       if (!this.validSlot(slot)) return;
 
       this.players[slot - 1] = { name, mods, ready, teamColor };
@@ -186,7 +214,7 @@ export class MpLobbyInfoComponent implements OnInit {
   }
 
   handlePlayerLeft(message: string) {
-    let match = message.match(/^(\S+)\sleft the game\.$/);
+    let match = message.match(/^(.+)\sleft the game\.$/);
     if (!match) return;
 
     let username = match[1];
@@ -225,7 +253,7 @@ export class MpLobbyInfoComponent implements OnInit {
     let mode = match[1];
     let winCon = match[2];
     if (!mode.includes('Team')) this.removeTeamColorsFromPlayers()
-    return {mode, winCon};
+    return { mode, winCon };
   }
 
   handleTeamModeAndWinConChange(message: string) {
@@ -234,7 +262,7 @@ export class MpLobbyInfoComponent implements OnInit {
     let mode = match[1];
     let winCon = match[2];
     if (!mode.includes('Team')) this.removeTeamColorsFromPlayers()
-    return {mode, winCon};
+    return { mode, winCon };
   }
 
   private removeTeamColorsFromPlayers() {
