@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { map, Observable } from 'rxjs';
 import { MatchDetailResponse } from '../models/multiplayer-lobby';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OsuApiService {
-  private readonly baseUrl = 'http://chat-api.rrailgun.com';
+  private readonly baseUrl = environment.baseApiUrl;
 
   constructor(private http: HttpClient) {}
 

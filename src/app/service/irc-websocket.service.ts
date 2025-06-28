@@ -4,6 +4,7 @@ import { IRCWebSocketEventTypes } from '../models/irc-event-types';
 import { IRCMessage, IRCMessageType } from '../models/message';
 import { extractMPId } from '../util/bancho-bot-util';
 import { playNotification, playThankYouForPlaying } from '../util/audio-playing';
+import { environment } from '../../environments/environment';
 
 
 @Injectable({
@@ -17,7 +18,7 @@ export class IrcWebsocketService implements OnDestroy {
   @Output() leftChannelEvent: EventEmitter<string> = new EventEmitter<string>();
   loggedInUsername: string = '';
 
-  private wsUrl: string = 'ws://chat-api.rrailgun.com'
+  private wsUrl: string = environment.webSocketApiUrl;
   private socket!: WebSocket;
 
   private connectionStatus: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
