@@ -17,7 +17,7 @@ export class IrcWebsocketService implements OnDestroy {
   @Output() leftChannelEvent: EventEmitter<string> = new EventEmitter<string>();
   loggedInUsername: string = '';
 
-  private wsUrl: string = 'ws://localhost:3000'
+  private wsUrl: string = 'ws://chat-api.rrailgun.com'
   private socket!: WebSocket;
 
   private connectionStatus: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);

@@ -7,7 +7,7 @@ import { MatchDetailResponse } from '../models/multiplayer-lobby';
   providedIn: 'root',
 })
 export class OsuApiService {
-  private readonly baseUrl = 'http://localhost:3000';
+  private readonly baseUrl = 'http://chat-api.rrailgun.com';
 
   constructor(private http: HttpClient) {}
 
