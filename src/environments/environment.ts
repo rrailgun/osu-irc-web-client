@@ -1,6 +1,6 @@
 export const environment = {
     environment: 'prod',
     production: true,
-    webSocketApiUrl: 'wss://api.rrailgun.com/chat',
-    baseApiUrl: 'https://api.rrailgun.com/chat/api'
+    webSocketApiUrl: 'ws://localhost:3000/chat',
+    baseApiUrl: 'http://localhost:3000/chat/api'
 };
