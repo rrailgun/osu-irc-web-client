@@ -1,0 +1,67 @@
+name: Build osu-tourney-irc
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [22.x]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+
+    - run: npm ci
+    - run: npm run build
+
+    - name: Calculate release tag
+      id: calc_tag
+      env:
+        RUN_NUMBER: ${{ github.run_number }}
+      run: |
+        #!/bin/bash
+        YY=$(date -u +'%y')
+        WW=$(date -u +'%V')
+        RELEASENUM=$RUN_NUMBER
+        TAG="${YY}.${WW}-${RELEASENUM}"
+        echo "release_tag=$TAG" >> $GITHUB_OUTPUT
+
+    - name: Zip dist/osu-tourney-irc folder
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      run: |
+        zip -r dist-${{ steps.calc_tag.outputs.release_tag }}.zip dist/osu-tourney-irc/
+
+    - name: Create Release
+      id: create_release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.calc_tag.outputs.release_tag }}
+        release_name: Release ${{ steps.calc_tag.outputs.release_tag }}
+        draft: false
+        prerelease: false
+
+    - name: Upload Release Asset
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: dist-${{ steps.calc_tag.outputs.release_tag }}.zip
+        asset_name: dist-${{ steps.calc_tag.outputs.release_tag }}.zip
+        asset_content_type: application/zip
