@@ -14,7 +14,7 @@ export class OsuApiService {
 
   getMatchInfo(matchId: string): Observable<MatchDetailResponse> {
     // Hardcoded full endpoint URL here
-    const url = `${this.baseUrl}/api/match/${matchId}`;
+    const url = `${this.baseUrl}/match/${matchId}`;
     return this.http.get<any>(url).pipe(
       map((res: MatchDetailResponse) => ({
         ...res,
