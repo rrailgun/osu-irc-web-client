@@ -1,0 +1,22 @@
+input {
+    width: 7ch;
+    border: none;
+    outline: none;
+    background: 0 0;
+    text-align: center;
+}
+
+button {
+    margin-right: 2px;
+    margin-bottom: 2px;
+}
+
+.quick-button-row {
+    display: flex;
+}
+
+.quick-button-row-container {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}

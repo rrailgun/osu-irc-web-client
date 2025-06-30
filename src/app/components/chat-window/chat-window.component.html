@@ -1,33 +1,36 @@
 <div class="side-by-side-container">
-  <nz-card [nzTitle]="'Chat | '+channel" style="width: 30%;">
-    <nz-list [nzBordered]="false" style="max-height: 70vh; overflow-y: auto;">
-      <nz-list-item *ngFor="let group of groupedMessages" style="padding: 8px 0;">
-        <ng-template #profileName>
-          <a [href]="'https://osu.ppy.sh/users/' + group.nick" target="_blank">
-            {{ group.nick }}
-          </a>
-        </ng-template>
-        <nz-list-item-meta [nzTitle]="profileName" [nzDescription]="messagesTemplate">
-        </nz-list-item-meta>
-        <ng-template #messagesTemplate>
-          <div *ngFor="let msg of group.messages" class="message-text">
-            <div class="message-content">{{ msg.message }}</div>
-            <div class="chat-timestamp">{{ msg.time | date:'mediumTime' }}</div>
-          </div>
-        </ng-template>
-      </nz-list-item>
-    </nz-list>
-    <div class="chat-input-container">
-      <input nz-input [(ngModel)]="newMessage" placeholder="Type a message" (keyup.enter)="sendMessage()"
-        [disabled]="disableInput" />
-      <button nz-button nzType="primary" (click)="sendMessage()" [disabled]="disableInput">
-        Send
+  <div style="width: 30%;">
+    <nz-card [nzTitle]="'Chat | '+channel">
+      <nz-list [nzBordered]="false" style="max-height: 70vh; overflow-y: auto;">
+        <nz-list-item *ngFor="let group of groupedMessages" style="padding: 8px 0;">
+          <ng-template #profileName>
+            <a [href]="'https://osu.ppy.sh/users/' + group.nick" target="_blank">
+              {{ group.nick }}
+            </a>
+          </ng-template>
+          <nz-list-item-meta [nzTitle]="profileName" [nzDescription]="messagesTemplate">
+          </nz-list-item-meta>
+          <ng-template #messagesTemplate>
+            <div *ngFor="let msg of group.messages" class="message-text">
+              <div class="message-content">{{ msg.message }}</div>
+              <div class="chat-timestamp">{{ msg.time | date:'mediumTime' }}</div>
+            </div>
+          </ng-template>
+        </nz-list-item>
+      </nz-list>
+      <div class="chat-input-container">
+        <input nz-input [(ngModel)]="newMessage" placeholder="Type a message" (keyup.enter)="sendMessage()"
+          [disabled]="disableInput" />
+        <button nz-button nzType="primary" (click)="sendMessage()" [disabled]="disableInput">
+          Send
+        </button>
+      </div>
+      <button nz-button nzType="primary" (click)="downloadChatLog(channel || 'Chat_Log')">
+        Download Chat Log
       </button>
-    </div>
-    <button nz-button nzType="primary" (click)="downloadChatLog(channel || 'Chat_Log')">
-      Download Chat Log
-    </button>
-  </nz-card>
+    </nz-card>
+    <app-quick-buttons [channel]="channel"></app-quick-buttons>
+  </div>
   <ng-container *ngIf="channel?.startsWith('#mp_')">
     @let matchID = channel!.substring(4);
     <div style="display: flex; flex-direction: row; width: 70%;">

@@ -1,0 +1,14 @@
+<div class="quick-button-row-container">
+    <div *ngFor="let button of quickButtons" class="quick-button-row">
+        <button nz-button nzType="default" (click)="sendCommand(button)">
+            <ng-container *ngIf="button.requiresInput; else noInput">
+                {{ button.label }}
+                <input type="number" [(ngModel)]="button.inputValue" (click)="$event.stopPropagation()" />
+            </ng-container>
+            <ng-template #noInput>
+                {{ button.label }}
+            </ng-template>
+        </button>
+    </div>
+
+</div>

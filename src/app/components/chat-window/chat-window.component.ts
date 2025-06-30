@@ -12,6 +12,7 @@ import { IRCMessage } from '../../models/message';
 import { filter } from 'rxjs';
 import { MpLobbyInfoComponent } from '../mp-lobby-info/mp-lobby-info.component';
 import { MatchInfoComponent } from "../match-info/match-info.component";
+import { QuickButtonsComponent } from "../quick-buttons/quick-buttons.component";
 
 @Component({
   selector: 'app-chat-window',
@@ -25,8 +26,9 @@ import { MatchInfoComponent } from "../match-info/match-info.component";
     NzButtonModule,
     NzAvatarModule,
     MpLobbyInfoComponent,
-    MatchInfoComponent
-  ],
+    MatchInfoComponent,
+    QuickButtonsComponent
+],
   providers: [
     DatePipe
   ],
