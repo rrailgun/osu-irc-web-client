@@ -1,10 +1,11 @@
-import { EventEmitter, Injectable, OnDestroy, Output } from '@angular/core';
+import { EventEmitter, inject, Injectable, OnDestroy, Output } from '@angular/core';
 import { BehaviorSubject, filter, map, Observable } from 'rxjs';
 import { IRCWebSocketEventTypes } from '../models/irc-event-types';
 import { IRCMessage, IRCMessageType } from '../models/message';
 import { extractMPId } from '../util/bancho-bot-util';
 import { playNotification, playThankYouForPlaying } from '../util/audio-playing';
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 
 @Injectable({
@@ -12,8 +13,9 @@ import { environment } from '../../environments/environment';
 })
 export class IrcWebsocketService implements OnDestroy {
 
-  @Output() connectionClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
+  private router: Router = inject(Router);
 
+  @Output() connectionClosed: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() msgFromUnjoinedChannel: EventEmitter<string> = new EventEmitter<string>();
   @Output() leftChannelEvent: EventEmitter<string> = new EventEmitter<string>();
   loggedInUsername: string = '';
@@ -83,6 +85,10 @@ export class IrcWebsocketService implements OnDestroy {
     };
 
     this.socket.onerror = (error) => console.error('[WebSocket] Error:', error);
+    this.socket.onclose = () => {
+      this.connectionStatus.next(false)
+      this.router.navigateByUrl('/')
+    }
   }
 
   private send(message: any): void {

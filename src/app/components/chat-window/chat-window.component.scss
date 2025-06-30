@@ -19,7 +19,6 @@ nz-list-item {
 }
 
 nz-list-item-meta {
-  max-width: 85%;
   overflow-wrap: break-word;
 }
 
@@ -40,4 +39,16 @@ input[nz-input] {
 
 app-mp-lobby-info {
   width: 50%;
+}
+
+.message-text {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  word-break: break-word;
+}
+
+.chat-timestamp {
+  margin-left: 8px;
+  white-space: nowrap;
 }

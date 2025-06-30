@@ -1,5 +1,5 @@
 import { Component, ElementRef, EventEmitter, inject, Input, OnInit, Output, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzListModule } from 'ng-zorro-antd/list';
@@ -27,12 +27,16 @@ import { MatchInfoComponent } from "../match-info/match-info.component";
     MpLobbyInfoComponent,
     MatchInfoComponent
   ],
+  providers: [
+    DatePipe
+  ],
   templateUrl: './chat-window.component.html',
   styleUrls: ['./chat-window.component.scss']
 })
 export class ChatWindowComponent implements OnInit {
 
   private chatService: IrcWebsocketService = inject(IrcWebsocketService)
+  private datePipe: DatePipe = inject(DatePipe);
   @ViewChild('scrollContainer', { read: ElementRef }) scrollContainer!: ElementRef;
   @Input() channel: string | undefined;
   messages: IRCMessage[] = [];
@@ -69,4 +73,42 @@ export class ChatWindowComponent implements OnInit {
       this.newMessage = '';
     }
   }
+
+  shouldShowProfile(i: number): boolean {
+    return i === 0 || this.messages[i - 1].nick !== this.messages[i].nick;
+  }
+
+  // Component method to group consecutive messages by nick
+  get groupedMessages() {
+    const groups = [];
+    let currentGroup = null;
+
+    for (const msg of this.messages) {
+      if (!currentGroup || currentGroup.nick !== msg.nick) {
+        currentGroup = { nick: msg.nick, messages: new Array() };
+        groups.push(currentGroup);
+      }
+      currentGroup.messages.push(msg);
+    }
+    return groups;
+  }
+
+  downloadChatLog(filename: string) {
+    let lines = this.messages.map(msg => {
+      let timeStr = this.datePipe.transform(msg.time, 'mediumTime') || '';
+      return `[${timeStr}] ${msg.nick}: ${msg.message}`;
+    });
+
+    let blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    let url = window.URL.createObjectURL(blob);
+
+    let a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.log`
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+  }
+
+
 }

@@ -1,18 +1,22 @@
 <div class="side-by-side-container">
   <nz-card [nzTitle]="'Chat | '+channel" style="width: 30%;">
-    <nz-list [nzBordered]="false" style="max-height: 70vh; overflow-y: auto;" #scrollContainer>
-      <nz-list-item *ngFor="let message of messages">
+    <nz-list [nzBordered]="false" style="max-height: 70vh; overflow-y: auto;">
+      <nz-list-item *ngFor="let group of groupedMessages" style="padding: 8px 0;">
         <ng-template #profileName>
-          <a [href]="'https://osu.ppy.sh/users/'+message.nick" target="_blank">
-            {{message.nick}}
+          <a [href]="'https://osu.ppy.sh/users/' + group.nick" target="_blank">
+            {{ group.nick }}
           </a>
         </ng-template>
-        <nz-list-item-meta [nzTitle]="profileName" [nzDescription]="message.message">
+        <nz-list-item-meta [nzTitle]="profileName" [nzDescription]="messagesTemplate">
         </nz-list-item-meta>
-        <div>{{ message.time | date: 'shortTime' }}</div>
+        <ng-template #messagesTemplate>
+          <div *ngFor="let msg of group.messages" class="message-text">
+            <div class="message-content">{{ msg.message }}</div>
+            <div class="chat-timestamp">{{ msg.time | date:'mediumTime' }}</div>
+          </div>
+        </ng-template>
       </nz-list-item>
     </nz-list>
-
     <div class="chat-input-container">
       <input nz-input [(ngModel)]="newMessage" placeholder="Type a message" (keyup.enter)="sendMessage()"
         [disabled]="disableInput" />
@@ -20,6 +24,9 @@
         Send
       </button>
     </div>
+    <button nz-button nzType="primary" (click)="downloadChatLog(channel || 'Chat_Log')">
+      Download Chat Log
+    </button>
   </nz-card>
   <ng-container *ngIf="channel?.startsWith('#mp_')">
     @let matchID = channel!.substring(4);
